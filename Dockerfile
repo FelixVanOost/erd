@@ -14,11 +14,11 @@
 #  - Go to Preferences > Resources > Memory
 #  - and give docker more memory (eg: 4gb)
 
-FROM haskell:8
+FROM haskell:8-slim
 
 WORKDIR /opt/erd
 
-RUN apt-get update && apt-get install -y graphviz
+RUN apt-get update && apt-get install -y graphviz && apt-get clean
 RUN cabal v2-update && cabal v2-install erd
 
 ENTRYPOINT ["erd"]
