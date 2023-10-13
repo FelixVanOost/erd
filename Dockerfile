@@ -14,7 +14,7 @@
 #  - Go to Preferences > Resources > Memory
 #  - and give docker more memory (eg: 4gb)
 
-FROM haskell:9.2-slim
+FROM haskell:9.6-slim
 
 WORKDIR /opt/erd
 
