@@ -13,8 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu-latest, buildjet-4vcpu-ubuntu-2204-arm]
-    runs-on: ${{ matrix.runner }}
+        os: [ ubuntu-latest ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+          - os: 'ARM64' # self-hosted
+            platform: 'linux-arm64'
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       packages: write
