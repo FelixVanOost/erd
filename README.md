@@ -1,7 +1,7 @@
 # Fork of ERD
 
 ![Hackage](https://img.shields.io/hackage/v/erd.svg)
-![GitHub Container Repository](https://img.shields.io/badge/ghcr-v0.2.3-blue?style=flat&label=ghcr.io/yuzutech/erd)
+[![GitHub Container Repository](https://img.shields.io/badge/ghcr-v0.2.3-blue?style=flat&label=ghcr.io/yuzutech/erd)](https://github.com/yuzutech/erd/pkgs/container/erd/257247359?tag=v0.2.3)
 
 
 This utility takes a plain text description of entities, their attributes and
