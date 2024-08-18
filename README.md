@@ -1,5 +1,8 @@
-[![Build Status](https://travis-ci.org/BurntSushi/erd.svg?branch=master)](https://travis-ci.org/BurntSushi/erd)
+# Fork of ERD
+
 ![Hackage](https://img.shields.io/hackage/v/erd.svg)
+![GitHub Container Repository](https://img.shields.io/badge/ghcr-v0.2.3-blue?style=flat&label=ghcr.io/yuzutech/erd)
+
 
 This utility takes a plain text description of entities, their attributes and
 the relationships between entities and produces a visual diagram modeling the
