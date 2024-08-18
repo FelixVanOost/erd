@@ -1,0 +1,80 @@
+name: Haskell CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc-version: [8.10.1, 8.8.3, 8.6.4, 8.4.4]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up GHC
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: ${{ matrix.ghc-version }}
+        cabal-version: 3.2
+
+    - name: Cache Cabal packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cabal/packages
+          ~/.cabal/store
+          ~/.hlint
+        key: ${{ runner.os }}-cabal-${{ matrix.ghc-version }}-${{ hashFiles('**/cabal.project', '**/cabal.project.freeze', '**/cabal.project.local') }}
+
+    - name: Prepare Cabal configuration
+      run: |
+        CABALHOME=$HOME/.cabal
+        mkdir -p $CABALHOME
+        echo "verbose: normal +nowrap +markoutput"          > $CABALHOME/config
+        echo "remote-build-reporting: anonymous"            >> $CABALHOME/config
+        echo "write-ghc-environment-files: always"          >> $CABALHOME/config
+        echo "remote-repo-cache: $CABALHOME/packages"       >> $CABALHOME/config
+        echo "logs-dir:          $CABALHOME/logs"           >> $CABALHOME/config
+        echo "world-file:        $CABALHOME/world"          >> $CABALHOME/config
+        echo "extra-prog-path:   $CABALHOME/bin"            >> $CABALHOME/config
+        echo "symlink-bindir:    $CABALHOME/bin"            >> $CABALHOME/config
+        echo "installdir:        $CABALHOME/bin"            >> $CABALHOME/config
+        echo "build-summary:     $CABALHOME/logs/build.log" >> $CABALHOME/config
+        echo "store-dir:         $CABALHOME/store"          >> $CABALHOME/config
+        echo "install-dirs user"                            >> $CABALHOME/config
+        echo "  prefix: $CABALHOME"                         >> $CABALHOME/config
+        echo "repository hackage.haskell.org"               >> $CABALHOME/config
+        echo "  url: http://hackage.haskell.org/"           >> $CABALHOME/config
+
+    - name: Install dependencies
+      run: |
+        cabal update
+        cabal v2-freeze -w ghc-${{ matrix.ghc-version }} --enable-tests --enable-benchmarks
+        cabal v2-build -w ghc-${{ matrix.ghc-version }} --disable-tests --disable-benchmarks --dependencies-only -j2
+
+    - name: Build the project
+      run: |
+        cabal v2-build -w ghc-${{ matrix.ghc-version }} --disable-tests --disable-benchmarks all
+
+    - name: Run tests
+      run: |
+        cabal v2-test -w ghc-${{ matrix.ghc-version }} --enable-tests --enable-benchmarks all
+
+    - name: Check the package
+      run: |
+        DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
+        cabal v2-sdist all
+        mv dist-newstyle/sdist/*.tar.gz ${DISTDIR}/
+        cd ${DISTDIR}
+        find . -maxdepth 1 -type f -name '*.tar.gz' -exec tar -xvf '{}' \;
+        PKGDIR_erd="$(find . -maxdepth 1 -type d -regex '.*/erd-[0-9.]*')"
+        cd $PKGDIR_erd
+        cabal check
